@@ -1,0 +1,90 @@
+$iolpc2138.h
+$iolpc2138.h
+
+
+//port 1
+#define RD_wr   25
+#define RS	24
+//port 0
+#define d6	22
+#define E   26
+#define TOUCH_lcd 31
+
+;---------------------------------------------------------------
+; __bysy_ready
+;---------------------------------------------------------------
+		MODULE	__busy_ready
+		PUBLIC	__busy_ready
+        RSEG	CODE:CODE:NOROOT(2)
+    CODE32
+__busy_ready
+
+        //make D7-D0 (P1.23-P1.16) as input, but RS(P1.24) and R_w(P1.25) still remain as output
+        ldr     r2,=FIO1DIR
+        ldr     r1,=0x03000000
+        str     r1,[r2,#0]
+
+        //clear RS
+        ldr     r3,=FIO1CLR
+        ldr     r1,=1<<RS
+        str     r1,[r3,#0]
+        //set RD_wr
+        ldr     r3,=FIO1SET
+        ldr     r1,=1<<RD_wr
+        str     r1,[r3,#0]
+        //set E
+        ldr     r3,=FIO0SET
+        ldr     r1,=1<<E
+        str     r1,[r3,#0]
+
+        ldr     r3,=FIO1PIN
+__busy_ready_0:
+        ldr     r4,[r3,#0] //read from pins
+        tst     r4,#0x00400000
+        beq     __busy_ready_0
+__busy_ready_00:
+        ldr     r4,[r3,#0] //read from pins
+        tst     r4,#0x00400000
+        beq     __busy_ready_00
+__busy_ready_000:
+        ldr     r4,[r3,#0] //read from pins
+        tst     r4,#0x00400000
+        beq     __busy_ready_000
+
+__busy_ready_1:
+        ldr     r4,[r3,#0] //read from pins
+        tst     r4,#0x00400000
+        bne     __busy_ready_1
+__busy_ready_11:
+        ldr     r4,[r3,#0] //read from pins
+        tst     r4,#0x00400000
+        bne     __busy_ready_11
+__busy_ready_111:
+        ldr     r4,[r3,#0] //read from pins
+        tst     r4,#0x00400000
+        bne     __busy_ready_111
+
+        //clr E
+        ldr     r3,=FIO0CLR
+        ldr     r1,=1<<E
+        str     r1,[r3,#0]
+        //clr RD_wr
+        ldr     r3,=FIO1CLR
+        ldr     r1,=1<<RD_wr
+        str     r1,[r3,#0]
+        //set RS
+        ldr     r3,=FIO1SET
+        ldr     r1,=1<<RS
+        str     r1,[r3,#0]
+
+        //make D7-D0 (P1.23-P1.16), RS(P1.24) and R_w(P1.25) as OUTPUT
+        //ldr     r2,=IO1DIR
+        ldr     r1,=0x03FF0000
+        str     r1,[r2,#0]
+
+        ldr     r0,=FIO0PIN
+        ldr     r1,[r0,#0]
+        bx      r14
+        //ENDMOD
+
+    END
